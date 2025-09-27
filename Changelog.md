@@ -1,4 +1,4 @@
-## 🚀 Backend Setup Log: Voluntra Django Project
+## Backend Setup Log: Voluntra Django Project
 
 This log tracks all major installation and configuration changes made to the Django backend, completing Task 1 of the project plan.
 
@@ -57,4 +57,37 @@ DATABASES = {
         'HOST': os.environ.get('DB_HOST'),
         'PORT': os.environ.get('DB_PORT'),
     }
-}
+} 
+```
+
+---
+---
+## Backend Development Log: Database Schema & API Layer
+
+This log documents the successful completion of **Task 2: Dashboard Functionality**, which involved defining the entire application schema and creating the REST API endpoints using Django REST Framework (DRF).
+
+### 1. Model Implementation (Task 2, Part 1)
+
+| Task | Detail | Rationale/Outcome |
+| :--- | :--- | :--- |
+| **Model Definition** | Defined four core models in `api/models.py`: `CustomUser`, `Event`, `VolunteerApplication`, and `CorporateDonations`. | Establishes the entire database schema required by the application, including core relational logic. |
+| **CustomUser** | Extended `AbstractUser` and added the `role` field with `NGO`, `Volunteer`, and `Corporate` choices. | Enables secure role-based access control and dynamic dashboard routing across the application. |
+| **Enrollment Logic** | Created `VolunteerApplication` with `unique_together = ('event', 'volunteer')` and a status field. | Ensures a Volunteer can only apply to an event once and allows the NGO to track the application status. |
+| **Settings** | Added `AUTH_USER_MODEL = 'api.CustomUser'` to `core/settings.py`. | Instructed Django to use the custom model for authentication, a necessary prerequisite for all system features. |
+
+#### Verification
+
+* **Database:** PostgreSQL database tables were successfully created via `python manage.py migrate`.
+
+---
+
+### 2. API Endpoints (Task 2, Part 2)
+
+| File | Change | Rationale/Outcome |
+| :--- | :--- | :--- |
+| **`api/serializers.py`** | Defined four serializers (`UserSerializer`, `EventSerializer`, etc.) using `read_only_fields` extensively. | Converts complex model data into JSON for the frontend, ensuring sensitive system-managed fields (`donor`, `created_by`, `transaction_id`, etc.) are protected. |
+| **`api/views.py`** | Created four `ModelViewSet`s with custom permission and queryset methods (`get_permissions`, `get_queryset`). | Implements all necessary CRUD operations and enforces robust **Role-Based Access Control (RBAC)**. |
+| | **RBAC & Filtering** | Logic restricts `CREATE/UPDATE/DELETE` for **Events** to NGOs only, and ensures users only retrieve data relevant to their role (e.g., volunteers only see their applications). |
+| **`api/urls.py`** | Configured `DefaultRouter` to register ViewSets for `profile/`, `events/`, `applications/`, and `donations/`. | Generates clean, RESTful URLs (e.g., `GET /api/events/`) automatically, making the API accessible to the React frontend. |
+
+---
