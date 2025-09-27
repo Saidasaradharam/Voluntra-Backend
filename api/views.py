@@ -1,3 +1,100 @@
-from django.shortcuts import render
+from rest_framework import viewsets, permissions, status
+from rest_framework.response import Response
+from .models import CustomUser, Event, VolunteerApplication, CorporateDonations
+from .serializers import (
+    UserSerializer, 
+    EventSerializer, 
+    VolunteerApplicationSerializer, 
+    CorporateDonationsSerializer
+)
 
-# Create your views here.
+class IsNgo(permissions.BasePermission):
+    """
+    Custom permission to only allow NGOs to access certain views.
+    """
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.is_ngo
+
+class IsVolunteer(permissions.BasePermission):
+    """
+    Custom permission to only allow Volunteers to access certain views.
+    """
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.is_volunteer
+    
+class UserProfileViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    A simple ViewSet for viewing user profiles.
+    """
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return CustomUser.objects.filter(pk=self.request.user.pk)
+
+class EventViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing events. Only NGOs can create, update, or delete events.
+    Volunteers and Corporates can view published events.
+    """
+    queryset = Event.objects.filter(is_published=True).order_by('-date')
+    serializer_class = EventSerializer
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            permission_classes = [IsNgo]
+        else:
+            permission_classes = [permissions.AllowAny]
+        return [permission() for permission in permission_classes]
+
+    def perform_create(self, serializer):
+        # Automatically set the event creator to the logged-in NGO user
+        serializer.save(created_by=self.request.user)
+
+class VolunteerApplicationViewSet(viewsets.ModelViewSet):
+    serializer_class = VolunteerApplicationSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_ngo():
+            # NGOs can see applications for their events
+            return VolunteerApplication.objects.filter(event__created_by=user).order_by('-applied_at')
+        elif user.is_volunteer():
+            # Volunteers can see their own applications
+            return VolunteerApplication.objects.filter(volunteer=user).order_by('-applied_at')
+        else:
+            return VolunteerApplication.objects.none()
+        
+    def get_permissions(self):
+        if self.action == 'create':
+            # Only volunteers can submit an application
+            self.permission_classes = [IsVolunteer]
+        elif self.action in ['update', 'partial_update']:
+            self.permission_classes = [IsNgo]
+        else:
+            self.permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in self.permission_classes]
+
+    def perform_create(self, serializer):
+        # Automatically set the volunteer to the logged-in user
+        serializer.save(volunteer=self.request.user)
+
+class CorporateDonationsViewSet(viewsets.ModelViewSet):
+    serializer_class = CorporateDonationsSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_ngo():
+            # NGOs can see donations made to them
+            return CorporateDonations.objects.filter(ngo=user).order_by('-donated_at')
+        elif user.is_corporate() or user.is_volunteer():
+            # Corporates and Volunteers can see their own donations
+            return CorporateDonations.objects.filter(donor=user).order_by('-donated_at')
+        else:
+            return CorporateDonations.objects.none()
+
+    def perform_create(self, serializer):
+        # Automatically set the donor to the logged-in user
+        serializer.save(donor=self.request.user)
