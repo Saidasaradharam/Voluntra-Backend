@@ -1,0 +1,19 @@
+# .gitignore content
+# Virtual Environment
+venv/
+.venv/
+__pycache__/
+
+# Python/Django Files
+*.pyc
+*.log
+.DS_Store
+
+# Django-specific files
+/media/
+/static_root/
+db.sqlite3
+
+# Important: Hide sensitive settings
+# You might want to create a separate file for local settings
+core/local_settings.py
