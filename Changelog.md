@@ -91,3 +91,31 @@ This log documents the successful completion of **Task 2: Dashboard Functionalit
 | **`api/urls.py`** | Configured `DefaultRouter` to register ViewSets for `profile/`, `events/`, `applications/`, and `donations/`. | Generates clean, RESTful URLs (e.g., `GET /api/events/`) automatically, making the API accessible to the React frontend. |
 
 ---
+---
+##  User Authentication Setup Log
+
+This section documents the successful configuration of the JWT authentication system using `djoser` and `djangorestframework-simplejwt`, establishing the security foundation for the application.
+
+### 1. Configuration (`core/settings.py` & URLs)
+
+Key settings were configured to enable the JWT flow and connect the custom user serializer.
+
+Installed the following:
+>pip install djangorestframework-simplejwt djoser
+
+| Task | Configuration Change | Rationale/Outcome |
+| :--- | :--- | :--- |
+| **App Registration** | Added `'djoser'` and `'rest_framework_simplejwt'` to `INSTALLED_APPS`. | Enables the necessary authentication features and token management. |
+| **User Serializer** | Defined the custom `CustomUserCreateSerializer` and configured `DJOSER['SERIALIZERS']` to point to it. | Ensures the `role` field is accepted during registration and the correct user data is returned on login (`/users/me/`). |
+| **Default Auth Class** | Added `JWTAuthentication` as the default authentication class in `REST_FRAMEWORK`. | Instructs Django to verify JWT tokens in the `Authorization: Bearer` header for all API requests. |
+| **URL Registration** | Added `path('auth/', include('djoser.urls'))` and `path('auth/', include('djoser.urls.jwt'))` to `api/urls.py`. | Exposes the necessary endpoints for Registration (`/api/auth/users/`) and Login (`/api/auth/jwt/create/`). |
+
+### 2. Verification
+
+The following critical authentication endpoints were successfully tested:
+
+* **Registration:** `POST /api/auth/users/` (Returns HTTP 201 Created with user's role).
+* **Login:** `POST /api/auth/jwt/create/` (Returns HTTP 200 OK with `access` and `refresh` tokens).
+* **Protected Access:** `GET /api/auth/users/me/` (Successfully authenticates using the JWT, confirming the role-based system is ready).
+
+---
