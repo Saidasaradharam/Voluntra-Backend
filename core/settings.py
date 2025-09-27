@@ -150,3 +150,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Custom user model which has a 'role' field
+AUTH_USER_MODEL = 'api.CustomUser'
