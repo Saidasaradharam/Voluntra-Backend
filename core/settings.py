@@ -85,12 +85,13 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
+        # Reads values from the environment variables (loaded from .env)
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'voluntra_db',      # Your PostgreSQL database name
-        'USER': 'your_db_user',      # Your PostgreSQL username
-        'PASSWORD': 'your_db_password', # Your PostgreSQL password
-        'HOST': 'localhost',         # Or your remote host IP/URL
-        'PORT': '5432',              # Default PostgreSQL port
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
     }
 }
 
