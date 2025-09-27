@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig', 
     'rest_framework',
     'corsheaders',
+    'djoser',               
+    'rest_framework_simplejwt'
 ]
 
 MIDDLEWARE = [
@@ -153,3 +155,48 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom user model which has a 'role' field
 AUTH_USER_MODEL = 'api.CustomUser'
+
+
+# REST Framework to use JWT Authentication by default
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication', # Keep session for Admin access
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
+}
+
+# Djoser Configuration
+DJOSER = {
+    # Using custom user model
+    'USER_ID_FIELD': 'id',
+    'USER_MODEL': 'api.CustomUser',
+    
+    # Fields required for user creation/registration
+    'SERIALIZERS': {
+        'user_create': 'api.djoser_serializers.CustomUserCreateSerializer',
+        'user': 'api.serializers.UserSerializer', 
+    },
+    
+    # JWT tokens for authentication
+    'TOKEN_MODEL': None, # We use JWT, not legacy Token model
+    'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
+    'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
+    
+    # UID and Token for JWT creation
+    'ACTIVATION_URL': '#/activate/{uid}/{token}',
+    'SEND_ACTIVATION_EMAIL': False, 
+}
+
+# Simple JWT Configuration (Set token lifespan)
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), # Access tokens are short-lived
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),   # Refresh tokens are long-lived
+    'AUTH_HEADER_TYPES': ('Bearer',),              # Client sends 'Authorization: Bearer <token>'
+    'USER_ID_FIELD': 'id',                         # Must match your CustomUser ID field
+    'USER_ID_CLAIM': 'user_id',
+}
