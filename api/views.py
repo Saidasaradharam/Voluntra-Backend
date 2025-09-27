@@ -1,12 +1,33 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from .models import CustomUser, Event, VolunteerApplication, CorporateDonations
+from rest_framework.decorators import api_view, permission_classes 
+from rest_framework.permissions import AllowAny 
 from .serializers import (
     UserSerializer, 
     EventSerializer, 
     VolunteerApplicationSerializer, 
     CorporateDonationsSerializer
 )
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def check_user_exists(request):
+    """
+    Checks if a user with the given username exists in the database.
+    """
+    username = request.data.get('username')
+    
+    if not username:
+        return Response({"detail": "Username is required."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Check if the user exists
+    user_exists = CustomUser.objects.filter(username__iexact=username).exists()
+    
+    return Response({
+        "username": username,
+        "exists": user_exists
+    }, status=status.HTTP_200_OK)
 
 class IsNgo(permissions.BasePermission):
     """

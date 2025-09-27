@@ -17,10 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # path('auth/check_user/', api_views.check_user_exists),
     path('api/', include('api.urls')),
-    path('auth/', include('djoser.urls')), # /users/ and /users/me/
-    path('auth/', include('djoser.urls.jwt')), # /jwt/create/, /jwt/refresh/, /jwt/verify/
+    # path('auth/', include('djoser.urls')), # /users/ and /users/me/
+    # path('auth/', include('djoser.urls.jwt')), # /jwt/create/, /jwt/refresh/, /jwt/verify/
 ]
