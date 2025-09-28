@@ -1,13 +1,15 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
-from .models import CustomUser, Event, VolunteerApplication, CorporateDonations
+from .models import CustomUser, Event, VolunteerApplication, CorporateDonations, ContactMessage
 from rest_framework.decorators import api_view, permission_classes 
 from rest_framework.permissions import AllowAny 
+from rest_framework import generics
 from .serializers import (
     UserSerializer, 
     EventSerializer, 
     VolunteerApplicationSerializer, 
-    CorporateDonationsSerializer
+    CorporateDonationsSerializer,
+    ContactMessageSerializer
 )
 
 @api_view(['POST'])
@@ -119,3 +121,11 @@ class CorporateDonationsViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Automatically set the donor to the logged-in user
         serializer.save(donor=self.request.user)
+
+class ContactMessageView(generics.CreateAPIView):
+    """
+    Handles POST requests for the public Contact Us form submission.
+    """
+    queryset = ContactMessage.objects.all() # Define queryset
+    serializer_class = ContactMessageSerializer # Define serializer
+    permission_classes = [AllowAny]

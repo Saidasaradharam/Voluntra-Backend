@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Event, VolunteerApplication, CorporateDonations
+from .models import CustomUser, Event, VolunteerApplication, CorporateDonations, ContactMessage
 
 # User/Registration Serializers
 class UserSerializer(serializers.ModelSerializer):
@@ -36,6 +36,16 @@ class CorporateDonationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CorporateDonations
         fields = '__all__'
-        read_only_fields = ['donated_at', 'transaction_id', 'donor']
+        read_only_fields = ['donated_at', 'transaction_id', 'donor']\
+        
+class ContactMessageSerializer(serializers.ModelSerializer):
+    # This acts like validaiton
+    name = serializers.CharField(max_length=100, min_length=2)
+    message = serializers.CharField(min_length=10) 
+
+    class Meta:
+        model = ContactMessage
+        fields = '__all__'
+        read_only_fields = ['received_at']
 
     

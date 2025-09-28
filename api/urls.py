@@ -2,6 +2,7 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 from . import views
 from api import views as api_views 
+from api.views import ContactMessageView
 
 
 router = DefaultRouter()
@@ -15,5 +16,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('auth/check_user/', api_views.check_user_exists),
     path('auth/', include('djoser.urls')), # /users/ and /users/me/
-    path('auth/', include('djoser.urls.jwt')) # /jwt/create/, /jwt/refresh/, /jwt/verify/
+    path('auth/', include('djoser.urls.jwt')), # /jwt/create/, /jwt/refresh/, /jwt/verify/
+    path('contact/', ContactMessageView.as_view(), name='contact-submit'),
+
 ]

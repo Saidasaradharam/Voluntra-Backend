@@ -104,3 +104,21 @@ class CorporateDonations(models.Model):
     def __str__(self):
         return f"{self.corporate.username} donated {self.amount} to {self.ngo.username}"
     
+
+class ContactMessage(models.Model):
+    """
+    Stores contact messages sent via the contact form.
+    """
+    name = models.CharField(max_length=100)
+    email = models.EmailField(max_length=100)
+    subject = models.CharField(max_length=200, blank=True, null=True)
+    message = models.TextField()
+    received_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Message from {self.name} - {self.subject or 'No Subject'}"
+    
+    class Meta:
+        verbose_name = "Contact Message" 
+        verbose_name_plural = "Contact Messages"
+        ordering = ['-received_at'] 
