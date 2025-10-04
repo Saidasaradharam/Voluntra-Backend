@@ -45,7 +45,7 @@ class IsVolunteer(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.is_volunteer
     
-class UserProfileViewSet(viewsets.ReadOnlyModelViewSet):
+class UserProfileViewSet(viewsets.ModelViewSet):
     """
     A simple ViewSet for viewing user profiles.
     """
@@ -54,7 +54,17 @@ class UserProfileViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        # Allow superusers (admin) to see all, but normal users only their own ID
+        if self.request.user.is_superuser:
+            return CustomUser.objects.all()
         return CustomUser.objects.filter(pk=self.request.user.pk)
+    
+    def perform_update(self, serializer):
+        # Prevents role from being changed via this API unless by an admin
+        if 'role' in serializer.validated_data and not self.request.user.is_superuser:
+            del serializer.validated_data['role']
+        
+        serializer.save()
 
 class EventViewSet(viewsets.ModelViewSet):
     """
