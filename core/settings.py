@@ -178,6 +178,7 @@ DJOSER = {
     'SERIALIZERS': {
         'user_create': 'api.djoser_serializers.CustomUserCreateSerializer',
         'user': 'api.serializers.UserSerializer', 
+        'current_user': 'api.serializers.UserSerializer',
     },
     
     # JWT tokens for authentication
