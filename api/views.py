@@ -71,8 +71,18 @@ class EventViewSet(viewsets.ModelViewSet):
     ViewSet for managing events. Only NGOs can create, update, or delete events.
     Volunteers and Corporates can view published events.
     """
-    queryset = Event.objects.filter(is_published=True).order_by('-date')
+    queryset = Event.objects.all().order_by('-created_at')
     serializer_class = EventSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_authenticated and user.is_ngo:
+            # NGO: See all events they created (published AND unpublished)
+            return Event.objects.filter(created_by=user).order_by('-date')
+        
+        # Volunteer/Public: Only see published events
+        return Event.objects.filter(is_published=True).order_by('-date')
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -82,8 +92,15 @@ class EventViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
     def perform_create(self, serializer):
-        # Automatically set the event creator to the logged-in NGO user
-        serializer.save(created_by=self.request.user)
+        # Ensure the logged-in user is an NGO before saving
+        if self.request.user.is_authenticated and self.request.user.is_ngo:
+            serializer.save(
+                created_by=self.request.user, 
+                ngo=self.request.user
+            )
+        else:
+            raise serializers.ValidationError({"detail": "Only authenticated NGO users can create events."})
+    
 
 class VolunteerApplicationViewSet(viewsets.ModelViewSet):
     serializer_class = VolunteerApplicationSerializer
@@ -115,7 +132,7 @@ class VolunteerApplicationViewSet(viewsets.ModelViewSet):
 
 class CorporateDonationsViewSet(viewsets.ModelViewSet):
     serializer_class = CorporateDonationsSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user

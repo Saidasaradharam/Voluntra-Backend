@@ -15,9 +15,26 @@ class EventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = '__all__'
-        read_only_fields = ['created_at', 'created_by']
+        fields = [
+            'id', 
+            'title', 
+            'description', 
+            'date', 
+            'startTime', 
+            'endTime', 
+            'location', 
+            'is_published', 
+            'created_by_username', 
+        ]
+        # NOTE: 'created_by' and 'created_at' are handled correctly as read-only.
+        # The 'ngo' ForeignKey is the main issue. Since 'created_by' and 'ngo' 
+        # both link to the NGO user and are set in perform_create, you only need
+        # to expose one for reading, or handle them consistently. 
+        
+        # Given your model has both 'ngo' and 'created_by', let's assume 'created_by' 
+        # is sufficient for the API output and ensure it is read-only.
 
+        read_only_fields = ['created_at', 'created_by', 'ngo']
 # Volunteer Application Serializers
 class VolunteerApplicationSerializer(serializers.ModelSerializer):
     volunteer_username = serializers.CharField(source='volunteer.username', read_only=True)
