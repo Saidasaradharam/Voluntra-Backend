@@ -119,3 +119,26 @@ The following critical authentication endpoints were successfully tested:
 * **Protected Access:** `GET /api/auth/users/me/` (Successfully authenticates using the JWT, confirming the role-based system is ready).
 
 ---
+
+## Feature Completion Log: Forms and Event - CRUD (Task 2, 3, 5)
+
+This section documents the successful implementation of the contact form and the completion of the full Create, Read, Update, Delete (CRUD) cycle for Events, marking the core application logic as functional.
+
+### 1. Contact Form Implementation
+
+| Feature | File | Rationale/Outcome |
+| :--- | :--- | :--- |
+| **Contact Message Model** | `api/models.py` | Added the `ContactMessage` model (`name`, `email`, `message`) to store public submissions. |
+| **Contact Form API** | `api/views.py` | Implemented `ContactMessageView` (inheriting `generics.CreateAPIView` with `AllowAny` permission) to handle unauthenticated public POST requests. |
+| **Input Validation** | `api/serializers.py` | Added explicit `min_length` validators for `name` and `message`, ensuring secure data quality on the backend. |
+| **URL Registration** | `core/urls.py` | Added a dedicated public endpoint: `path('api/contact/', ...)` |
+
+### 2. Event CRUD Completion
+
+| Feature | Implementation Detail | Rationale/Outcome |
+| :--- | :--- | :--- |
+| **Full CRUD** | `EventViewSet` now handles `CREATE`, `RETRIEVE`, `UPDATE`, and `DELETE` requests. | Confirms the primary functionality of the NGO dashboard is active. |
+| **Data Integrity Fix** | Modified `EventViewSet.perform_create` to explicitly assign the logged-in user to **both** `created_by` and `ngo` foreign key fields. | Resolved `IntegrityError: null value in column "ngo_id"` and ensures the event is correctly linked to the NGO profile. |
+| **Event Listing Filter** | Modified `EventViewSet.get_queryset` to show **all events (published and unpublished)** to the authenticated NGO manager. | Allows the NGO to manage draft status events, fulfilling the core dashboard requirement. |
+
+---
