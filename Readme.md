@@ -32,6 +32,19 @@ git clone https://github.com/Saidasaradharam/Voluntra-Backend.git
 cd Voluntra-Backend
 ```
 
+### 1. Database Prerequisite (PostgreSQL)
+
+You **must** have PostgreSQL installed and running locally.
+
+1.  **Install PostgreSQL:** Download and install the latest stable version of the PostgreSQL Database Server.
+2.  **Create Database:** Using the `psql` shell or `pgAdmin 4`, create the database that matches your settings:
+    ```sql
+    CREATE DATABASE voluntra_db;
+    ```
+3.  **Configure Credentials:** Ensure your local PostgreSQL user/password match the values set in your **`.env`** file.
+
+### 2. Environment Setup
+
 Create Virtual Environment
 ```
 python -m venv venv
@@ -40,6 +53,8 @@ venv\Scripts\activate      # Windows
 ```
 Install Dependencies
 `pip install -r requirements.txt`
+
+### 3. Run Project
 
 Run Migrations
 `python manage.py migrate`
